@@ -5,25 +5,17 @@ Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
     await requestQueue.addRequest({ url: "https://www.makro.cz/aktualni-nabidka/aktualni-letaky" });
 
-    // const dataset = await Apify.openDataset('dataset');
-
     const handlePageFunction = async ({ request, $ }) => {
 
         if (request.userData) {
             let catalogObject = $('script').last().html().match(/var data = (\{[\s\S]*?\});/);
-
+            
             if(catalogObject){
-                // json parse the variable string
                 catalogObject = JSON.parse(catalogObject[1]);
-                // console.log({ ...request.userData, downloadPdfUrl: catalogObject.config.downloadPdfUrl});
+                await Apify.pushData({ ...request.userData, downloadPdfUrl: catalogObject.config.downloadPdfUrl});
 
-                // await dataset.pushData([...dataset.getData(), { ...request.userData, downloadPdfUrl: json.config.downloadPdfUrl}]);
-                // await dataset.pushData({ ...request.userData, downloadPdfUrl: json.config.downloadPdfUrl});
-
-                await Apify.setValue('OUTPUT',[...value, { ...request.userData, downloadPdfUrl: catalogObject.config.downloadPdfUrl}]); 
+                return
             }
-
-            return
         }
 
 
@@ -31,7 +23,6 @@ Apify.main(async () => {
             .first()
             .find('a')
             .map(async (i, e) => {
-
                 await requestQueue.addRequest({
                     url: $(e).attr('href'),
                     userData: {
@@ -43,7 +34,6 @@ Apify.main(async () => {
 
             }
             ).get()
-            
 
     };
 
@@ -53,4 +43,11 @@ Apify.main(async () => {
     });
 
     await crawler.run();
+
+    const dataSet = await Apify.openDataset();
+    const output = await dataSet.map(i => i);
+
+    await Apify.setValue('OUTPUT', output);
+
+
 });
