@@ -18,19 +18,19 @@ Apify.main(async () => {
             }
         }
 
-
-        $('ul.catalog')
-            .first()
-            .find('a')
-            .map(async (i, e) => {
-                await requestQueue.addRequest({
-                    url: $(e).attr('href'),
-                    userData: {
-                        name: $('> strong', e).text().trim(),
-                        expirationDate: $('> span', e).text().replace(/\s/g, ''),
-                    }
-                })
-                return
+        
+        $('li.catalog')
+        .find('a')
+        .map(async (i, e) => {
+            await requestQueue.addRequest({
+                url: $(e).attr('href'),
+                userData: {
+                    name: $(e).find('strong').text().trim(),
+                    expirationDate: $(e).find('span').text().replace(/\s/g, ''),
+                
+                }
+            })
+            return
 
             }
             ).get()
